@@ -31,6 +31,42 @@ This project provides a RESTful API for downloading videos from various platform
    ./scripts/dev.sh
    ```
 
+### Docker Setup
+
+1. Build the Docker image using the provided build script:
+   ```bash
+   ./scripts/build.sh
+   ```
+   This will create a Docker image named `labs-gin-app:latest`.
+
+2. Run the service using Docker Compose:
+   ```bash
+   cd deployments
+   docker compose up -d
+   ```
+   This will start the service in detached mode, listening on port 8080.
+
+3. To stop the service:
+   ```bash
+   docker compose down
+   ```
+
+4. Monitor logs:
+   ```bash
+   docker compose logs -f
+   ```
+
+### Docker Environment Variables
+
+When running with Docker Compose, you can configure the following environment variables in the `deployments/docker-compose.yml` file:
+
+| Name | Description | Default |
+|------|-------------|---------|
+| PORT | The port on which the service listens | 8080 |
+| TASK_MENAGER_NUM_WORKERS | Number of concurrent download workers | 4 |
+
+The downloaded files will be persisted in the `./public/downloads` directory on your host machine through Docker volume mapping.
+
 ## API Documentation
 
 ### Download Tasks
@@ -132,7 +168,7 @@ This project provides a RESTful API for downloading videos from various platform
 | Name | Description | Default |
 |------|-------------|---------|
 | DL_FOLDER_ROOT | Directory for downloaded files | ./public/downloads |
-| NUM_WORKERS | Number of concurrent download workers | 4 |
+| TASK_MENAGER_NUM_WORKERS | Number of concurrent download workers | 4 |
 
 ## Development Resources
 
