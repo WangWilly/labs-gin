@@ -2,6 +2,7 @@ package dltask
 
 import (
 	"net/http"
+	"path/filepath"
 
 	"github.com/WangWilly/labs-gin/pkgs/tasks"
 	"github.com/gin-gonic/gin"
@@ -22,7 +23,11 @@ func (c *Controller) Create(ctx *gin.Context) {
 	}
 
 	fileID := uuid.New().String() + ".mp4"
-	filePath := c.cfg.DlFolderRoot + "/" + fileID
+	filePath, err := filepath.Abs(filepath.Join(c.cfg.DlFolderRoot, fileID))
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get absolute path"})
+		return
+	}
 	ytdlTask := tasks.NewTask(req.Url, filePath)
 	c.TaskManager.SubmitTask(ytdlTask)
 	taskID := ytdlTask.GetID()

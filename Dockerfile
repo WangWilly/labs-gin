@@ -16,7 +16,10 @@ RUN go build -o bin/main cmd/main.go
 # Stage 3: Runtime container
 FROM alpine:latest AS runner
 WORKDIR /app
-RUN apk add --no-cache ca-certificates ffmpeg
+RUN apk add --no-cache ca-certificates ffmpeg 
+
+# https://github.com/yt-dlp/yt-dlp-wiki/blob/master/Installation.md
+RUN apk -U add yt-dlp
 
 # Copy the compiled binary from the build stage
 COPY --from=build /app/bin/main /app/bin/main

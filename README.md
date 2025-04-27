@@ -12,6 +12,7 @@ This project provides a RESTful API for downloading videos from various platform
 
 - Go 1.24 or higher
 - [GVM](https://github.com/moovweb/gvm) (optional, for managing Go versions)
+- https://github.com/yt-dlp/yt-dlp-wiki/blob/master/Installation.md
 
 ### Setup
 
@@ -71,18 +72,26 @@ The downloaded files will be persisted in the `./public/downloads` directory on 
 
 ### Download Tasks
 
-#### Create a download task
-- **URL**: `/dlTask`
-- **Method**: `POST`
-- **Request Body**:
+#### Create a Download Task
+- **Endpoint**: `/dlTask`
+- **HTTP Method**: `POST`
+- **Description**: Initiates a new video download task for the specified URL.
+- **Request Parameters**:
+  | Parameter | Type | Required | Description |
+  |-----------|------|----------|-------------|
+  | url | string | Yes | The video URL to download |
+
+- **Request Body Example**:
   ```json
   {
-    "url": "https://www.youtube.com/watch?v=example"
+    "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
   }
   ```
-- **Success Response**:
-  - **Code**: 201 Created
-  - **Content**:
+
+- **Response**: 
+  - **Status Code**: 201 Created
+  - **Content Type**: application/json
+  - **Body**:
     ```json
     {
       "task_id": "b3a63526-24c0-4fe8-a068-f8ae28349788",
@@ -90,13 +99,18 @@ The downloaded files will be persisted in the `./public/downloads` directory on 
       "status": "task submitted"
     }
     ```
-  - Note: `task_id` is used to track and manage the download process, while `file_id` is the filename of the resulting video file
+  - **Response Fields**:
+    | Field | Type | Description |
+    |-------|------|-------------|
+    | task_id | string | Unique identifier for tracking and managing the download task |
+    | file_id | string | Identifier of the resulting video file (used for accessing the file) |
+    | status | string | Current status of the task |
 
-- **curl Example**:
+- **Example Request**:
   ```bash
   curl -X POST http://localhost:8080/dlTask \
     -H "Content-Type: application/json" \
-    -d '{"url": "https://www.youtube.com/watch?v=example"}'
+    -d '{"url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}'
   ```
 
 #### Get task status
@@ -174,3 +188,4 @@ The downloaded files will be persisted in the `./public/downloads` directory on 
 
 - [Go Modules Documentation](https://go.dev/wiki/Modules#quick-start)
 - [YouTube Downloader Library](https://github.com/kkdai/youtube)
+- https://github.com/yt-dlp/yt-dlp-wiki/blob/master/Installation.md

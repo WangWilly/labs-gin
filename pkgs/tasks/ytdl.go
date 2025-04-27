@@ -6,7 +6,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"path/filepath"
+	"os/exec"
 	"time"
 
 	"github.com/google/uuid"
@@ -52,6 +52,21 @@ func (t *DownloadTask) GetProgress() int64 {
 }
 
 func (t *DownloadTask) Execute() {
+	t.progress = 30
+
+	if err := exec.Command(
+		"yt-dlp",
+		"-o", t.filePath,
+		"-f", "mp4",
+		t.targetUrl,
+	).Run(); err != nil {
+		t.progress = -1
+		fmt.Printf("Error executing command: %v\n", err)
+		return
+	}
+	t.progress = 100
+
+	/**
 	rootPath := filepath.Dir(t.filePath)
 	downloader := GetDownloader(rootPath)
 	t.progress = 10
@@ -71,6 +86,7 @@ func (t *DownloadTask) Execute() {
 		return
 	}
 	t.progress = 100
+	*/
 
 	/**
 	client := youtube.Client{}
