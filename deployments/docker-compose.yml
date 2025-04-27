@@ -1,0 +1,13 @@
+version: '3'
+services:
+  backend:
+    image: labs-gin-app:latest
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - './public/downloads:/app/public/downloads'
+    environment:
+      PORT: 8080
+      TASK_MENAGER_NUM_WORKERS: 4
+    

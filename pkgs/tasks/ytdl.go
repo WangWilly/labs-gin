@@ -65,7 +65,7 @@ func (t *DownloadTask) Execute() {
 	t.progress = 20
 
 	fileName := filepath.Base(t.filePath)
-	if err := downloader.DownloadComposite(context.Background(), fileName, video, "", "", ""); err != nil {
+	if err := downloader.DownloadComposite(context.Background(), fileName, video, "medium", "", ""); err != nil {
 		t.progress = -1
 		fmt.Printf("Error downloading video: %v\n", err)
 		return
