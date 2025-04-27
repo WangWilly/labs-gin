@@ -49,11 +49,19 @@ This project provides a RESTful API for downloading videos from various platform
   - **Content**:
     ```json
     {
-      "task_id": "550e8400-e29b-41d4-a716-446655440000",
+      "task_id": "b3a63526-24c0-4fe8-a068-f8ae28349788",
       "file_id": "550e8400-e29b-41d4-a716-446655440000.mp4",
       "status": "task submitted"
     }
     ```
+  - Note: `task_id` is used to track and manage the download process, while `file_id` is the filename of the resulting video file
+
+- **curl Example**:
+  ```bash
+  curl -X POST http://localhost:8080/dlTask \
+    -H "Content-Type: application/json" \
+    -d '{"url": "https://www.youtube.com/watch?v=example"}'
+  ```
 
 #### Get task status
 - **URL**: `/dlTask/:tid`
@@ -64,11 +72,16 @@ This project provides a RESTful API for downloading videos from various platform
   - **Content**:
     ```json
     {
-      "task_id": "550e8400-e29b-41d4-a716-446655440000",
+      "task_id": "b3a63526-24c0-4fe8-a068-f8ae28349788",
       "status": 75
     }
     ```
   - `status` is an integer representing the download progress (0-100)
+
+- **curl Example**:
+  ```bash
+  curl -X GET http://localhost:8080/dlTask/b3a63526-24c0-4fe8-a068-f8ae28349788
+  ```
 
 #### Cancel a task
 - **URL**: `/dlTask/:tid`
@@ -79,11 +92,16 @@ This project provides a RESTful API for downloading videos from various platform
   - **Content**:
     ```json
     {
-      "task_id": "550e8400-e29b-41d4-a716-446655440000",
+      "task_id": "b3a63526-24c0-4fe8-a068-f8ae28349788",
       "status_before_cancel": 45,
       "status": "task cancelled"
     }
     ```
+
+- **curl Example**:
+  ```bash
+  curl -X DELETE http://localhost:8080/dlTask/b3a63526-24c0-4fe8-a068-f8ae28349788
+  ```
 
 ### File Access
 
@@ -98,6 +116,16 @@ This project provides a RESTful API for downloading videos from various platform
     - `Content-Type`: video/mp4
     - `Accept-Ranges`: bytes
     - `Content-Length`: [file size]
+
+- **curl Examples**:
+  ```bash
+  # Download the entire file
+  curl -X GET http://localhost:8080/dlTaskFile/550e8400-e29b-41d4-a716-446655440000.mp4 --output video.mp4
+  
+  # Stream a portion of the file (partial content)
+  curl -X GET http://localhost:8080/dlTaskFile/550e8400-e29b-41d4-a716-446655440000.mp4 \
+    -H "Range: bytes=0-1048576" --output video_part.mp4
+  ```
 
 ## Environment Variables
 
