@@ -1,0 +1,10 @@
+package taskmanager
+
+////////////////////////////////////////////////////////////////////////////////
+
+type Task interface {
+	Execute()
+	GetID() string
+	GetProgress() int64
+	Cancel()
+}
