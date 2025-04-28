@@ -27,7 +27,7 @@ func NewTaskPool(cfg Config) *TaskPool {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &TaskPool{
 		maxWorkers: cfg.NumWorkers,
-		tasks:      make(chan Task),
+		tasks:      make(chan Task, cfg.NumWorkers*10),
 		idTaskMap:  make(map[string]Task),
 		wg:         sync.WaitGroup{},
 		ctx:        ctx,
