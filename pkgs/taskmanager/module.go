@@ -37,6 +37,10 @@ func NewTaskPool(cfg Config) *TaskPool {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+func (p *TaskPool) GetCtx() context.Context {
+	return p.ctx
+}
+
 func (p *TaskPool) SubmitTask(task Task) {
 	if task == nil {
 		return

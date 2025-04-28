@@ -41,6 +41,19 @@ func NewTask(url string, filepath string) *DownloadTask {
 	return task
 }
 
+func NewTaskWithCtx(ctx context.Context, url string, filepath string) *DownloadTask {
+	ctx, cancel := context.WithCancel(ctx)
+	task := &DownloadTask{
+		taskID:    uuid.New().String(),
+		targetUrl: url,
+		filePath:  filepath,
+		progress:  0,
+		ctx:       ctx,
+		cancel:    cancel,
+	}
+	return task
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 func (t *DownloadTask) GetID() string {
@@ -54,94 +67,29 @@ func (t *DownloadTask) GetProgress() int64 {
 func (t *DownloadTask) Execute() {
 	t.progress = 30
 
-	if err := exec.Command(
+	if err := exec.CommandContext(
+		t.ctx,
 		"yt-dlp",
 		"-o", t.filePath,
 		"-f", "mp4",
 		t.targetUrl,
 	).Run(); err != nil {
 		t.progress = -1
-		fmt.Printf("Error executing command: %v\n", err)
+		if t.ctx.Err() == context.Canceled {
+			fmt.Printf("Download canceled: %s\n", t.filePath)
+		} else {
+			fmt.Printf("Error executing command: %v\n", err)
+		}
 		return
 	}
 	t.progress = 100
-
-	/**
-	rootPath := filepath.Dir(t.filePath)
-	downloader := GetDownloader(rootPath)
-	t.progress = 10
-
-	video, err := downloader.GetVideoContext(t.ctx, t.targetUrl)
-	if err != nil {
-		t.progress = -1
-		fmt.Printf("Error fetching video info: %v\n", err)
-		return
-	}
-	t.progress = 20
-
-	fileName := filepath.Base(t.filePath)
-	if err := downloader.DownloadComposite(context.Background(), fileName, video, "medium", "", ""); err != nil {
-		t.progress = -1
-		fmt.Printf("Error downloading video: %v\n", err)
-		return
-	}
-	t.progress = 100
-	*/
-
-	/**
-	client := youtube.Client{}
-
-	video, err := client.GetVideoContext(t.ctx, t.targetUrl)
-	if err != nil {
-		t.progress = -1
-		fmt.Printf("Error fetching video info: %v\n", err)
-		return
-	}
-	t.progress = 10
-
-	formats := video.Formats.WithAudioChannels()
-	stream, _, err := client.GetStreamContext(t.ctx, video, &formats[0])
-	if err != nil {
-		t.progress = -1
-		fmt.Printf("Error getting stream: %v\n", err)
-		return
-	}
-	t.progress = 20
-	defer stream.Close()
-
-	file, err := os.Create(t.filePath)
-	if err != nil {
-		t.progress = -1
-		fmt.Printf("Error creating file: %v\n", err)
-		return
-	}
-	t.progress = 30
-	defer file.Close()
-
-	_, err = io.Copy(file, stream)
-	if err != nil {
-		panic(err)
-	}
-	*/
-
-	// err = t.copyWithContext(file, stream)
-	// if err != nil {
-	// 	t.progress = -1
-	// 	if err == context.Canceled {
-	// 		fmt.Printf("Download canceled: %s\n", t.filePath)
-	// 		// Clean up the incomplete file
-	// 		file.Close()
-	// 		os.Remove(t.filePath)
-	// 	} else {
-	// 		fmt.Printf("Error downloading video: %v\n", err)
-	// 	}
-	// 	return
-	// }
 
 	fmt.Printf("Download complete: %s\n", t.filePath)
 }
 
 func (t *DownloadTask) Cancel() {
+	fmt.Printf("Canceling download: %s, ", t.filePath)
+	fmt.Printf("Canceling task: %s\n", t.taskID)
 	t.cancel()
 }
 

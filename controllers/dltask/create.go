@@ -28,7 +28,7 @@ func (c *Controller) Create(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get absolute path"})
 		return
 	}
-	ytdlTask := tasks.NewTask(req.Url, filePath)
+	ytdlTask := tasks.NewTaskWithCtx(c.TaskManager.GetCtx(), req.Url, filePath)
 	c.TaskManager.SubmitTask(ytdlTask)
 	taskID := ytdlTask.GetID()
 
