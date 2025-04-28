@@ -189,3 +189,5 @@ The downloaded files will be persisted in the `./public/downloads` directory on 
 - [Go Modules Documentation](https://go.dev/wiki/Modules#quick-start)
 - [YouTube Downloader Library](https://github.com/kkdai/youtube)
 - https://github.com/yt-dlp/yt-dlp-wiki/blob/master/Installation.md
+- https://github.com/smartystreets/goconvey
+- https://github.com/uber-go/mock
