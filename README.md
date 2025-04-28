@@ -63,8 +63,8 @@ When running with Docker Compose, you can configure the following environment va
 
 | Name | Description | Default |
 |------|-------------|---------|
-| PORT | The port on which the service listens | 8080 |
-| TASK_MENAGER_NUM_WORKERS | Number of concurrent download workers | 4 |
+| PORT | The port on which the service listens | `8080` |
+| TASK_MENAGER_NUM_WORKERS | Number of concurrent download workers | `4` |
 
 The downloaded files will be persisted in the `./public/downloads` directory on your host machine through Docker volume mapping.
 
@@ -177,12 +177,14 @@ The downloaded files will be persisted in the `./public/downloads` directory on 
     -H "Range: bytes=0-1048576" --output video_part.mp4
   ```
 
-## Environment Variables
+## All Environment Variables
 
 | Name | Description | Default |
 |------|-------------|---------|
-| DL_FOLDER_ROOT | Directory for downloaded files | ./public/downloads |
-| TASK_MENAGER_NUM_WORKERS | Number of concurrent download workers | 4 |
+| PORT | The port on which the service listens | `8080` |
+| HOST | The host address for the service | `0.0.0.0` |
+| TASK_MENAGER_NUM_WORKERS | Number of concurrent download workers | `4` |
+| DL_TASK_CTRL_DL_FOLDER_ROOT | Directory for downloaded files | `./public/downloads` |
 
 ## Development Resources
 
