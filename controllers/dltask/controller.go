@@ -1,6 +1,8 @@
 package dltask
 
 import (
+	"time"
+
 	"github.com/WangWilly/labs-gin/pkgs/taskmanager"
 	"github.com/gin-gonic/gin"
 )
@@ -8,7 +10,10 @@ import (
 ////////////////////////////////////////////////////////////////////////////////
 
 type Config struct {
-	DlFolderRoot string `env:"DL_FOLDER_ROOT,default=./public/downloads"`
+	DlFolderRoot string        `env:"DL_FOLDER_ROOT,default=./public/downloads"`
+	RetryDelay   time.Duration `env:"RETRY_DELAY,default=5s"`
+	MaxRetries   int           `env:"MAX_RETRIES,default=3"`
+	MaxTimeout   time.Duration `env:"MAX_TIMEOUT,default=5m"`
 }
 
 type Controller struct {

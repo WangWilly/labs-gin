@@ -87,7 +87,19 @@ func (p *TaskPool) createWorker() {
 				fmt.Println("Task channel closed, exiting worker")
 				return
 			}
-			task.Execute()
+			done := task.Execute()
+			if done {
+				fmt.Println("Task completed successfully")
+				continue
+			}
+
+			fmt.Println("Task failed, retrying...")
+			sig := task.SetRetrySignal()
+			go func() {
+				<-sig
+				p.SubmitTask(task)
+			}()
+			delete(p.idTaskMap, task.GetID())
 		}
 	}
 }
