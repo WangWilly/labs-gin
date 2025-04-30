@@ -184,6 +184,10 @@ func (t *DownloadTask) SetRetrySignal() <-chan struct{} {
 		t.retryChannel <- struct{}{}
 	}()
 
+	if t.retries >= t.maxRetries {
+		fmt.Printf("Max retries reached for: %s\n", t.filePath)
+		return nil
+	}
 	return t.retryChannel
 }
 

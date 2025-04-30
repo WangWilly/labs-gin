@@ -16,6 +16,7 @@ type TaskPool struct {
 	maxWorkers int
 	tasks      chan Task
 	idTaskMap  map[string]Task
+	retryMap   map[string]Task
 	wg         sync.WaitGroup
 	ctx        context.Context
 	cancelFunc context.CancelFunc
@@ -29,6 +30,7 @@ func NewTaskPool(cfg Config) *TaskPool {
 		maxWorkers: cfg.NumWorkers,
 		tasks:      make(chan Task, cfg.NumWorkers*10),
 		idTaskMap:  make(map[string]Task),
+		retryMap:   make(map[string]Task),
 		wg:         sync.WaitGroup{},
 		ctx:        ctx,
 		cancelFunc: cancel,
@@ -54,6 +56,9 @@ func (p *TaskPool) SubmitTask(task Task) {
 
 func (p *TaskPool) GetTaskProgress(taskID string) (int64, error) {
 	if task, ok := p.idTaskMap[taskID]; ok {
+		return task.GetProgress(), nil
+	}
+	if task, ok := p.retryMap[taskID]; ok {
 		return task.GetProgress(), nil
 	}
 	return 0, fmt.Errorf("task not found")
@@ -99,10 +104,16 @@ func (p *TaskPool) createWorker() {
 
 			fmt.Println("Task failed, retrying...")
 			sig := task.SetRetrySignal()
+			if sig == nil {
+				fmt.Println("Task retry signal is nil, skipping retry")
+				continue
+			}
 			go func() {
 				<-sig
+				delete(p.retryMap, task.GetID())
 				p.SubmitTask(task)
 			}()
+			p.retryMap[task.GetID()] = task
 			delete(p.idTaskMap, task.GetID())
 		}
 	}
