@@ -6,7 +6,8 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/WangWilly/labs-gin/pkgs/cmd"
+	"github.com/WangWilly/labs-gin/pkgs/uuid"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -29,48 +30,9 @@ type DownloadTask struct {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func NewTask(url string, filepath string) *DownloadTask {
-	ctx, cancel := context.WithCancel(context.Background())
-	task := &DownloadTask{
-		taskID:    uuid.New().String(),
-		targetUrl: url,
-		filePath:  filepath,
-		progress:  0,
-
-		retries:      0,
-		retryDelay:   0,
-		maxRetries:   0,
-		retryChannel: make(chan struct{}, 1),
-
-		ctx:        ctx,
-		cancel:     cancel,
-		maxTimeout: 0,
-	}
-	return task
-}
-
-func NewTaskWithCtx(ctx context.Context, url string, filepath string) *DownloadTask {
-	ctx, cancel := context.WithCancel(ctx)
-	task := &DownloadTask{
-		taskID:    uuid.New().String(),
-		targetUrl: url,
-		filePath:  filepath,
-		progress:  0,
-
-		retries:      0,
-		retryDelay:   0,
-		maxRetries:   0,
-		retryChannel: make(chan struct{}, 1),
-
-		ctx:        ctx,
-		cancel:     cancel,
-		maxTimeout: 0,
-	}
-	return task
-}
-
 func NewRetribleTaskWithCtx(
 	ctx context.Context,
+	uuidGen uuid.UUID,
 	url string,
 	filepath string,
 	retryDelay time.Duration,
@@ -78,7 +40,34 @@ func NewRetribleTaskWithCtx(
 ) *DownloadTask {
 	ctx, cancel := context.WithCancel(ctx)
 	task := &DownloadTask{
-		taskID:    uuid.New().String(),
+		taskID:    uuidGen.New(),
+		targetUrl: url,
+		filePath:  filepath,
+		progress:  0,
+
+		retries:      0,
+		retryDelay:   retryDelay,
+		maxRetries:   maxRetries,
+		retryChannel: make(chan struct{}, 1),
+
+		ctx:        ctx,
+		cancel:     cancel,
+		maxTimeout: 0,
+	}
+	return task
+}
+
+func NewRetribleNamedTaskWithCtx(
+	ctx context.Context,
+	taskID string,
+	url string,
+	filepath string,
+	retryDelay time.Duration,
+	maxRetries int,
+) *DownloadTask {
+	ctx, cancel := context.WithCancel(ctx)
+	task := &DownloadTask{
+		taskID:    taskID,
 		targetUrl: url,
 		filePath:  filepath,
 		progress:  0,
@@ -112,24 +101,35 @@ func (t *DownloadTask) GetProgress() int64 {
 	return t.progress
 }
 
-func (t *DownloadTask) Execute() bool {
-	// Setup
-	t.progress = 30
-	ctx := t.ctx
-	if t.maxTimeout > 0 {
-		var cancel context.CancelFunc
-		ctx, cancel = context.WithTimeout(t.ctx, t.maxTimeout)
-		defer cancel()
-	}
+func (t *DownloadTask) GetFilePath() string {
+	return t.filePath
+}
 
+func (t *DownloadTask) GetTargetUrl() string {
+	return t.targetUrl
+}
+
+func (t *DownloadTask) GetRetries() int {
+	return t.retries
+}
+
+func (t *DownloadTask) GetMaxRetries() int {
+	return t.maxRetries
+}
+
+func (t *DownloadTask) GetRetryDelay() time.Duration {
+	return t.retryDelay
+}
+
+func (t *DownloadTask) GetMaxTimeout() time.Duration {
+	return t.maxTimeout
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+func (t *DownloadTask) execute(c cmd.Cmd) bool {
 	// Execute
-	if err := exec.CommandContext(
-		ctx,
-		"yt-dlp",
-		"-o", t.filePath,
-		"-f", "mp4",
-		t.targetUrl,
-	).Run(); err != nil {
+	if err := c.Run(); err != nil {
 		t.progress = -1
 		if t.ctx.Err() == context.Canceled {
 			fmt.Printf("Download canceled: %s\n", t.filePath)
@@ -146,6 +146,29 @@ func (t *DownloadTask) Execute() bool {
 	// Cleanup
 	fmt.Printf("Download complete: %s\n", t.filePath)
 	return true
+}
+
+func (t *DownloadTask) Execute() bool {
+	// Setup
+	t.progress = 30
+	ctx := t.ctx
+	if t.maxTimeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(t.ctx, t.maxTimeout)
+		defer cancel()
+	}
+
+	// Command
+	c := exec.CommandContext(
+		ctx,
+		"yt-dlp",
+		"-o", t.filePath,
+		"-f", "mp4",
+		t.targetUrl,
+	)
+
+	// Execute
+	return t.execute(c)
 }
 
 func (t *DownloadTask) SetRetrySignal() <-chan struct{} {

@@ -11,8 +11,9 @@ import (
 
 	"github.com/WangWilly/labs-gin/controllers/dltask"
 	"github.com/WangWilly/labs-gin/pkgs/taskmanager"
+	"github.com/WangWilly/labs-gin/pkgs/utils"
+	"github.com/WangWilly/labs-gin/pkgs/uuid"
 
-	"github.com/gin-gonic/gin"
 	"github.com/sethvargo/go-envconfig"
 )
 
@@ -39,16 +40,8 @@ func main() {
 
 	////////////////////////////////////////////////////////////////////////////
 
-	r := gin.Default()
-
-	////////////////////////////////////////////////////////////////////////////
-
-	r.StaticFile("/favicon.ico", "./public/icon/favicon.ico")
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
+	// Initialize Gin router
+	r := utils.GetDefaultRouter()
 
 	////////////////////////////////////////////////////////////////////////////
 
@@ -56,10 +49,13 @@ func main() {
 	taskManager := taskmanager.NewTaskPool(cfg.TaskManagerCfg)
 	taskManager.Run()
 
+	// UUid generator
+	uuidGen := uuid.NewGenerator()
+
 	////////////////////////////////////////////////////////////////////////////
 
 	// Initialize download task controller
-	dlTaskCtrl := dltask.NewController(cfg.DlTaskCtrlCfg, taskManager)
+	dlTaskCtrl := dltask.NewController(cfg.DlTaskCtrlCfg, taskManager, uuidGen)
 	dlTaskCtrl.RegisterRoutes(r)
 
 	////////////////////////////////////////////////////////////////////////////

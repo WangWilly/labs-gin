@@ -12,35 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-/**
-func (c *Controller) GetFile(ctx *gin.Context) {
-	fmt.Println("GetFile called")
-
-	fileID := ctx.Param("fid")
-	if fileID == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "file ID is required"})
-		return
-	}
-
-	// Prevent path traversal by removing any "../" or similar sequences
-	cleanFileID := filepath.Clean(fileID)
-	if strings.Contains(cleanFileID, "..") || strings.Contains(cleanFileID, "/") {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid file ID"})
-		return
-	}
-
-	filePath := filepath.Join(c.cfg.DlFolderRoot, cleanFileID)
-	fmt.Println("File path:", filePath)
-
-	// Check if file exists before serving
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "file not found"})
-		return
-	}
-
-	ctx.File(filePath)
-}
-*/
+////////////////////////////////////////////////////////////////////////////////
 
 func (c *Controller) GetFile(ctx *gin.Context) {
 	fmt.Println("GetFile called")

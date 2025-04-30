@@ -69,8 +69,12 @@ func (p *TaskPool) CancelTask(taskID string) error {
 }
 
 func (p *TaskPool) Run() {
-	for i := 0; i < p.maxWorkers; i++ {
-		go p.createWorker()
+	p.runFor(p.createWorker)
+}
+
+func (p *TaskPool) runFor(theFunc func()) {
+	for range p.maxWorkers {
+		go theFunc()
 	}
 }
 

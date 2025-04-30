@@ -3,7 +3,7 @@ package dltask
 import (
 	"time"
 
-	"github.com/WangWilly/labs-gin/pkgs/taskmanager"
+	"github.com/WangWilly/labs-gin/pkgs/uuid"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,13 +18,15 @@ type Config struct {
 
 type Controller struct {
 	cfg         Config
-	TaskManager *taskmanager.TaskPool
+	TaskManager TaskManager
+	UuidGen     uuid.UUID
 }
 
-func NewController(cfg Config, taskManager *taskmanager.TaskPool) *Controller {
+func NewController(cfg Config, taskManager TaskManager, uuidGen uuid.UUID) *Controller {
 	return &Controller{
 		cfg:         cfg,
 		TaskManager: taskManager,
+		UuidGen:     uuidGen,
 	}
 }
 
